@@ -1,0 +1,38 @@
+# Config for SimplyTab
+
+tab:
+  header:
+    - '<blue><bold><italic>Simply</italic></bold></blue>'
+    - '  <blue><bold><italic>Vanilla</italic></bold></blue>'
+    - ''
+    - 'Server: <bold><white><mc-version> </white><red>|</red></bold><reset> Players: <bold><white><online-count> </white><red>|</red></bold><reset> TPS: <bold><white><simplyrank_tps></white></bold>'
+    - ''
+  footer:
+    - ''
+    - '<white>Discord:</white><reset> <gray>/discord</gray>'
+    - '<white>Commands:</white><reset> <gray>/help</gray>'
+    - ''
+    - '<green>www.simplyvanilla.net - No Hacking Anarchy</green>'
+  tps:
+    '20': '<green>20.0*</green>'
+    '19': '<green>20.0*</green>'
+    '18': '<green>20.0*</green>'
+    '*': '<red>%value%</red>'
+
+group-placeholder: '<simplyrank_primary_rank>'
+group-sorting:
+  - Owner
+  - Admin
+  - Mod
+  - JrMod
+  - Creator
+  - OG
+  - Donator
+  - DonatorNitro
+  - DonatorVoter
+  - default
+  - Designer
+
+group-prefix: '<simplyrank_prefix> <green>'
+group-suffix: ''
+group-player-color: '<simplyrank_code_color>'
