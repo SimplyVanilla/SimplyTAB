@@ -4,35 +4,33 @@ import io.github.miniplaceholders.api.MiniPlaceholders;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.megavex.scoreboardlibrary.api.team.ScoreboardTeam;
 import net.megavex.scoreboardlibrary.api.team.TeamDisplay;
 import net.megavex.scoreboardlibrary.api.team.TeamManager;
 import net.simplyvanilla.simplytab.SimplyTabPlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TablistRankHandler implements Listener {
     private final SimplyTabPlugin plugin;
     private final TeamManager teamManager;
-    private final String groupPlaceholder;
     private final String groupPlayerColor;
     private final String tabDisplayName;
-    private final List<String> groupSorting;
 
     public TablistRankHandler(SimplyTabPlugin plugin) {
         this.plugin = plugin;
         this.teamManager = this.plugin.getScoreboardLibrary().createTeamManager();
-        this.groupPlaceholder = plugin.getConfig().getString("group-placeholder");
         this.groupPlayerColor = plugin.getConfig().getString("group-player-color");
         this.tabDisplayName = plugin.getConfig().getString("tab-displayname");
-        this.groupSorting = plugin.getConfig().getStringList("group-sorting");
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -73,21 +71,56 @@ public class TablistRankHandler implements Listener {
         Component component = MiniMessage.miniMessage().deserialize(this.groupPlayerColor, MiniPlaceholders.getAudienceGlobalPlaceholders(player));
 
         display.playerColor(NamedTextColor.nearestTo(component.style().color() == null ? NamedTextColor.WHITE : component.style().color()));
-        display.displayName(MiniMessage.miniMessage().deserialize(this.tabDisplayName, MiniPlaceholders.getAudienceGlobalPlaceholders(player), Placeholder.component("player_displayname", player.displayName())));
+        display.displayName(MiniMessage.miniMessage().deserialize(this.tabDisplayName, MiniPlaceholders.getAudienceGlobalPlaceholders(player)));
         display.addEntry(player.getName());
     }
 
     private String getTeamName(Player onlinePlayer) {
-        String group = PlainTextComponentSerializer.plainText().serialize(
-            MiniMessage.miniMessage().deserialize(this.groupPlaceholder, MiniPlaceholders.getAudiencePlaceholders(onlinePlayer))
-        );
+        ConfigurationSection sortings = this.plugin.getConfig().getConfigurationSection("sortings");
 
-        int index = this.groupSorting.indexOf(group);
-        if (index == -1) {
-            index = this.groupSorting.size() + 1;
+        int sortingId = 0;
+        for (String key : sortings.getKeys(false)) {
+            var section = sortings.getConfigurationSection(key);
+            var type = section.getString("type");
+
+            switch (type.toLowerCase()) {
+                case "index":
+                    var placeholder = section.getString("placeholder", "");
+                    var resolvedValue = PlainTextComponentSerializer.plainText().serialize(
+                        MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(onlinePlayer))
+                    );
+                    var values = section.getStringList("values");
+                    int index = values.indexOf(resolvedValue);
+                    if (index == -1) {
+                        index = values.size() + 1;
+                    }
+                    sortingId += index * 100;
+                    break;
+                case "alphabetical":
+                    placeholder = section.getString("placeholder", "");
+                    resolvedValue = PlainTextComponentSerializer.plainText().serialize(
+                        MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(onlinePlayer))
+                    );
+
+                    List<String> playerValues = new ArrayList<>(Bukkit.getOnlinePlayers().stream()
+                        .map(player -> PlainTextComponentSerializer.plainText().serialize(
+                            MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(player))
+                        )).toList());
+
+                    // sort player values alphabetically
+                    playerValues.sort(String::compareToIgnoreCase);
+                    index = playerValues.indexOf(resolvedValue);
+                    if (index == -1) {
+                        index = playerValues.size() + 1;
+                    }
+                    sortingId += index;
+                    break;
+                default:
+                    break;
+            }
         }
         // create team name like "0001_name"
-        String formattedName = String.format("%04d_%s", index, onlinePlayer.getName());
+        String formattedName = String.format("%05d_%s", sortingId, onlinePlayer.getName());
         // team name can only be 16 characters long
         return formattedName.substring(0, Math.min(formattedName.length(), 16));
     }

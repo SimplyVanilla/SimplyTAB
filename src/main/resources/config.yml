@@ -19,19 +19,25 @@ tab:
     '18': '<green>20.0*</green>'
     '*': '<red>%value%</red>'
 
-group-placeholder: '<simplyrank_primary_rank>'
-group-sorting:
-  - Owner
-  - Admin
-  - Mod
-  - JrMod
-  - Creator
-  - OG
-  - Donator
-  - DonatorNitro
-  - DonatorVoter
-  - default
-  - Designer
+sortings:
+  '1':
+    - type: 'index'
+      placeholder: '<simplyrank_primary_rank>'
+      values:
+        - Owner
+        - Admin
+        - Mod
+        - JrMod
+        - Creator
+        - OG
+        - Donator
+        - DonatorNitro
+        - DonatorVoter
+        - default
+        - Designer
+  '2':
+    - type: 'alphabetical'
+      placeholder: '<player_displayname>'
 
 group-prefix: '<simplyrank_prefix> <green>'
 group-suffix: ''
