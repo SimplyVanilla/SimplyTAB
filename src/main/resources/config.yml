@@ -36,3 +36,4 @@ group-sorting:
 group-prefix: '<simplyrank_prefix> <green>'
 group-suffix: ''
 group-player-color: '<simplyrank_code_color>'
+tab-displayname: '<player_displayname>'

@@ -4,6 +4,7 @@ import io.github.miniplaceholders.api.MiniPlaceholders;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.megavex.scoreboardlibrary.api.team.ScoreboardTeam;
 import net.megavex.scoreboardlibrary.api.team.TeamDisplay;
@@ -22,6 +23,7 @@ public class TablistRankHandler implements Listener {
     private final TeamManager teamManager;
     private final String groupPlaceholder;
     private final String groupPlayerColor;
+    private final String tabDisplayName;
     private final List<String> groupSorting;
 
     public TablistRankHandler(SimplyTabPlugin plugin) {
@@ -29,6 +31,7 @@ public class TablistRankHandler implements Listener {
         this.teamManager = this.plugin.getScoreboardLibrary().createTeamManager();
         this.groupPlaceholder = plugin.getConfig().getString("group-placeholder");
         this.groupPlayerColor = plugin.getConfig().getString("group-player-color");
+        this.tabDisplayName = plugin.getConfig().getString("tab-displayname");
         this.groupSorting = plugin.getConfig().getStringList("group-sorting");
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -70,7 +73,7 @@ public class TablistRankHandler implements Listener {
         Component component = MiniMessage.miniMessage().deserialize(this.groupPlayerColor, MiniPlaceholders.getAudienceGlobalPlaceholders(player));
 
         display.playerColor(NamedTextColor.nearestTo(component.style().color() == null ? NamedTextColor.WHITE : component.style().color()));
-
+        display.displayName(MiniMessage.miniMessage().deserialize(this.tabDisplayName, MiniPlaceholders.getAudienceGlobalPlaceholders(player), Placeholder.component("player_displayname", player.displayName())));
         display.addEntry(player.getName());
     }
 
