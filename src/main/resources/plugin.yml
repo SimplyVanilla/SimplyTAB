@@ -1,0 +1,10 @@
+main: net.simplyvanilla.simplytab.SimplyTabPlugin
+name: SimplyTab
+version: @version@
+api-version: 1.19
+
+author: Simply Vanilla
+website: https://github.com/SimplyVanilla/SimplyRank
+folia-supported: true
+
+depend: [MiniPlaceholders]
