@@ -1,16 +1,12 @@
 package net.simplyvanilla.simplytab.packets;
 
 import io.netty.channel.*;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -20,6 +16,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class PacketListener implements Listener {
+    private static final String UPDATE_INFO_PACKET = "ClientboundPlayerInfoUpdatePacket";
+    private static final String UPDATE_GAME_MODE_PACKET = "UPDATE_GAME_MODE";
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -41,6 +39,20 @@ public class PacketListener implements Listener {
 
     private void injectPlayer(Player player) {
         ChannelDuplexHandler channelDuplexHandler = new ChannelDuplexHandler() {
+
+            @Override
+            public void write(ChannelHandlerContext channelHandlerContext, Object packet, ChannelPromise promise) throws Exception {
+                try {
+                    if (!packet.toString().contains(UPDATE_INFO_PACKET)) return;
+
+                    EnumSet<?> actions = getFieldObject(packet, EnumSet.class.getSimpleName());
+                    List<?> entries = getFieldObject(packet, List.class.getSimpleName());
+                    if (actions.stream().noneMatch(p -> p.name().equals(UPDATE_GAME_MODE_PACKET))) return;
+
+                } finally {
+                    super.write(channelHandlerContext, packet, promise);
+                }
+            }
 
         };
 
