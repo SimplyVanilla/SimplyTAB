@@ -17,8 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class TablistRankHandler implements Listener {
     private final SimplyTabPlugin plugin;
@@ -76,49 +75,49 @@ public class TablistRankHandler implements Listener {
     }
 
     private String getTeamName(Player onlinePlayer) {
-        ConfigurationSection sortings = this.plugin.getConfig().getConfigurationSection("sortings");
+        List<Map<String, Object>> tmp = (List<Map<String, Object>>) this.plugin.getConfig().getList("sortings");
 
         int sortingId = 0;
-        for (String key : sortings.getKeys(false)) {
-            var section = sortings.getConfigurationSection(key);
-            var type = section.getString("type");
+        if (tmp != null)
+            for (var section : tmp) {
+                var type = (String) section.get("type");
 
-            switch (type.toLowerCase()) {
-                case "index":
-                    var placeholder = section.getString("placeholder", "");
-                    var resolvedValue = PlainTextComponentSerializer.plainText().serialize(
-                        MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(onlinePlayer))
-                    );
-                    var values = section.getStringList("values");
-                    int index = values.indexOf(resolvedValue);
-                    if (index == -1) {
-                        index = values.size() + 1;
-                    }
-                    sortingId += index * 100;
-                    break;
-                case "alphabetical":
-                    placeholder = section.getString("placeholder", "");
-                    resolvedValue = PlainTextComponentSerializer.plainText().serialize(
-                        MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(onlinePlayer))
-                    );
+                switch (type.toLowerCase()) {
+                    case "index":
+                        var placeholder = (String) section.getOrDefault("placeholder", "");
+                        var resolvedValue = PlainTextComponentSerializer.plainText().serialize(
+                            MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(onlinePlayer))
+                        );
+                        var values = (List<String>) section.get("values");
+                        int index = values.indexOf(resolvedValue);
+                        if (index == -1) {
+                            index = values.size() + 1;
+                        }
+                        sortingId += index * 100;
+                        break;
+                    case "alphabetical":
+                        placeholder = (String) section.getOrDefault("placeholder", "");
+                        resolvedValue = PlainTextComponentSerializer.plainText().serialize(
+                            MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(onlinePlayer))
+                        );
 
-                    List<String> playerValues = new ArrayList<>(Bukkit.getOnlinePlayers().stream()
-                        .map(player -> PlainTextComponentSerializer.plainText().serialize(
-                            MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(player))
-                        )).toList());
+                        List<String> playerValues = new ArrayList<>(Bukkit.getOnlinePlayers().stream()
+                            .map(player -> PlainTextComponentSerializer.plainText().serialize(
+                                MiniMessage.miniMessage().deserialize(placeholder, MiniPlaceholders.getAudiencePlaceholders(player))
+                            )).toList());
 
-                    // sort player values alphabetically
-                    playerValues.sort(String::compareToIgnoreCase);
-                    index = playerValues.indexOf(resolvedValue);
-                    if (index == -1) {
-                        index = playerValues.size() + 1;
-                    }
-                    sortingId += index;
-                    break;
-                default:
-                    break;
+                        // sort player values alphabetically
+                        playerValues.sort(String::compareToIgnoreCase);
+                        index = playerValues.indexOf(resolvedValue);
+                        if (index == -1) {
+                            index = playerValues.size() + 1;
+                        }
+                        sortingId += index;
+                        break;
+                    default:
+                        break;
+                }
             }
-        }
         // create team name like "0001_name"
         String formattedName = String.format("%05d_%s", sortingId, onlinePlayer.getName());
         // team name can only be 16 characters long
