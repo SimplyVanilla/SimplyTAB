@@ -2,10 +2,12 @@ package net.simplyvanilla.simplytab.tab;
 
 import io.papermc.paper.threadedregions.TickData;
 import io.papermc.paper.threadedregions.TickRegionScheduler;
+import org.bukkit.Bukkit;
 
 public class FoliaTpsProvider implements TpsProvider {
     @Override
     public double getTps() {
+
         TickData.TickReportData report = TickRegionScheduler.getCurrentRegion()
             .getData()
             .getRegionSchedulingHandle()
@@ -13,6 +15,7 @@ public class FoliaTpsProvider implements TpsProvider {
 
         double average = report.tpsData().segmentAll().average();
 
-        return report == null ? 0D : average;
+        return Bukkit.getTPS()[0];
+//        return report == null ? 0D : average;
     }
 }
