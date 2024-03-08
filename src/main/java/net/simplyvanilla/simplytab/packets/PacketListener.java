@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 public class PacketListener implements Listener {
     private static final String UPDATE_INFO_PACKET = "ClientboundPlayerInfoUpdatePacket";
     private static final String UPDATE_GAME_MODE_PACKET = "UPDATE_GAME_MODE";
+    private static final String GAME_MODE_ENUM_NAME = "EnumGamemode";
+    private static final String SPECTATOR_ENUM_NAME = "SPECTATOR";
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -48,6 +50,12 @@ public class PacketListener implements Listener {
                     EnumSet<?> actions = getFieldObject(packet, EnumSet.class.getSimpleName());
                     List<?> entries = getFieldObject(packet, List.class.getSimpleName());
                     if (actions.stream().noneMatch(p -> p.name().equals(UPDATE_GAME_MODE_PACKET))) return;
+
+                    Object entry = entries.get(0);
+
+                    Enum<?> gameType = getFieldObject(entry, GAME_MODE_ENUM_NAME);
+                    if (gameType == null) return;
+                    if (!gameType.name().equals(SPECTATOR_ENUM_NAME)) return;
 
                 } finally {
                     super.write(channelHandlerContext, packet, promise);
