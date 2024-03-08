@@ -8,10 +8,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -49,22 +51,47 @@ public class PacketListener implements Listener {
                     if (!packet.toString().contains(UPDATE_INFO_PACKET)) return;
 
                     EnumSet<?> actions = getFieldObject(packet, EnumSet.class.getSimpleName());
-                    List<?> entries = getFieldObject(packet, List.class.getSimpleName());
+                    List<Object> previousEntries = getFieldObject(packet, List.class.getSimpleName());
+                    List<Object> entries = new LinkedList<>(previousEntries);
                     if (actions.stream().noneMatch(p -> p.name().equals(UPDATE_GAME_MODE_PACKET))) return;
 
-                    Object entry = entries.get(0);
+                    for (int i = 0; i < entries.size(); i++) {
+                        Object entry = entries.get(i);
 
-                    Field gameTypeField = getField(entry, GAME_MODE_ENUM_NAME);
-                    Enum<?> gameType = (Enum<?>) gameTypeField.get(entry);
-                    if (gameType == null) return;
-                    if (!gameType.name().equals(SPECTATOR_ENUM_NAME)) return;
+                        Field gameTypeField = getField(entry, GAME_MODE_ENUM_NAME);
+                        Enum<?> gameType = (Enum<?>) gameTypeField.get(entry);
+                        if (gameType == null) return;
+                        if (!gameType.name().equals(SPECTATOR_ENUM_NAME)) continue;
 
-                    Class<?> clazz = gameType.getClass();
-                    Field replaceField = clazz.getDeclaredField(REPLACEMENT_ENUM);
-                    replaceField.setAccessible(true);
-                    Enum<?> replacement = (Enum<?>) replaceField.get(clazz);
+                        Class<?> clazz = gameType.getClass();
+                        Field replaceField = clazz.getDeclaredField(REPLACEMENT_ENUM);
+                        replaceField.setAccessible(true);
+                        Enum<?> replacement = (Enum<?>) replaceField.get(clazz);
 
-                    gameTypeField.set(entry, replacement);
+                        Class<?> entryClass = entry.getClass();
+                        Field[] fields = entryClass.getDeclaredFields();
+                        Object[] objects = Arrays.stream(fields).peek(f -> f.setAccessible(true)).map(f -> {
+                            try {
+                                if (f.getType().getSimpleName().equals(GAME_MODE_ENUM_NAME)) return replacement;
+                                return f.get(entry);
+                            } catch (IllegalAccessException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }).toList().toArray(new Object[0]);
+                        Class<?>[] classes = Arrays.stream(fields).map(Field::getType).toList().toArray(new Class[0]);
+
+                        Constructor<?> entryConstructor = entryClass.getDeclaredConstructor(classes);
+                        Object newEntry = entryConstructor.newInstance(objects);
+                        entries.set(i, newEntry);
+                    }
+
+                    if (previousEntries.equals(entries)) return;
+
+                    Class<?> packetClass = packet.getClass();
+                    Constructor<?> constructor = packetClass.getDeclaredConstructor(EnumSet.class, List.class);
+                    constructor.setAccessible(true);
+                    packet = constructor.newInstance(actions, entries);
+
                 } finally {
                     super.write(channelHandlerContext, packet, promise);
                 }
