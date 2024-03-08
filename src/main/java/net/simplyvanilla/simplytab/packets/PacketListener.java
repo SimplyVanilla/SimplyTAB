@@ -20,6 +20,7 @@ public class PacketListener implements Listener {
     private static final String UPDATE_GAME_MODE_PACKET = "UPDATE_GAME_MODE";
     private static final String GAME_MODE_ENUM_NAME = "EnumGamemode";
     private static final String SPECTATOR_ENUM_NAME = "SPECTATOR";
+    private static final String REPLACEMENT_ENUM = "c"; // ADVENTURE
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -53,10 +54,17 @@ public class PacketListener implements Listener {
 
                     Object entry = entries.get(0);
 
-                    Enum<?> gameType = getFieldObject(entry, GAME_MODE_ENUM_NAME);
+                    Field gameTypeField = getField(entry, GAME_MODE_ENUM_NAME);
+                    Enum<?> gameType = (Enum<?>) gameTypeField.get(entry);
                     if (gameType == null) return;
                     if (!gameType.name().equals(SPECTATOR_ENUM_NAME)) return;
 
+                    Class<?> clazz = gameType.getClass();
+                    Field replaceField = clazz.getDeclaredField(REPLACEMENT_ENUM);
+                    replaceField.setAccessible(true);
+                    Enum<?> replacement = (Enum<?>) replaceField.get(clazz);
+
+                    gameTypeField.set(entry, replacement);
                 } finally {
                     super.write(channelHandlerContext, packet, promise);
                 }
