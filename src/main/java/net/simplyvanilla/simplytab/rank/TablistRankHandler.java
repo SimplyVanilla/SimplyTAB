@@ -75,7 +75,7 @@ public class TablistRankHandler implements Listener {
     }
 
     private String getTeamName(Player onlinePlayer) {
-        List<Map<String, Object>> tmp = (List<Map<String, Object>>) this.plugin.getConfig().getList("sortings");
+        List<Map<String, Object>> tmp = (List<Map<String, Object>>) this.plugin.getConfig().getList("sorting");
 
         int sortingId = 0;
         if (tmp != null)
