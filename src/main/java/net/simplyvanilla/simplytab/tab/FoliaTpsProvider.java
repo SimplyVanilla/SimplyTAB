@@ -11,11 +11,8 @@ public class FoliaTpsProvider implements TpsProvider {
         TickData.TickReportData report = TickRegionScheduler.getCurrentRegion()
             .getData()
             .getRegionSchedulingHandle()
-            .getTickReport5s(System.nanoTime());
+            .getTickReport15s(System.nanoTime());
 
-        double average = report.tpsData().segmentAll().average();
-
-        return Bukkit.getTPS()[0];
-//        return report == null ? 0D : average;
+        return report.tpsData().segmentAll().average();
     }
 }
