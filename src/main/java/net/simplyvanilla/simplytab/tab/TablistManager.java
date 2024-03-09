@@ -41,7 +41,7 @@ public class TablistManager {
 
     private void updateTablistForPlayer(Player player) {
 
-        TagResolver tpsResolver = resolver("simplyrank_tps", inserting(miniMessage().deserialize(this.getTps())));
+        TagResolver tpsResolver = resolver("tps", inserting(miniMessage().deserialize(this.getTps())));
 
         TagResolver resolvers = resolver(
             getAudienceGlobalPlaceholders(player),
