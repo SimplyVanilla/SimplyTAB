@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,6 +38,11 @@ public class PacketListener implements Listener {
         removePlayer(event.getPlayer());
     }
 
+    @EventHandler
+    public void on(PlayerGameModeChangeEvent event) {
+
+    }
+
     public void loadAll() {
         Bukkit.getOnlinePlayers().forEach(this::injectPlayer);
     }
@@ -61,15 +67,13 @@ public class PacketListener implements Listener {
                     for (int i = 0; i < entries.size(); i++) {
                         Object entry = entries.get(i);
 
-                        UUID uuid = getFieldObject(entry, UUID.class.getSimpleName());
-                        if (!plugin.getConfig().getBoolean("hide-spectator-mode-self", false)) {
-                            if (player.getUniqueId().equals(uuid)) continue;
-                        }
-
                         Field gameTypeField = getField(entry, GAME_MODE_ENUM_NAME);
                         Enum<?> gameType = (Enum<?>) gameTypeField.get(entry);
-                        if (gameType == null) return;
+                        if (gameType == null) continue;
                         if (!gameType.name().equals(SPECTATOR_ENUM_NAME)) continue;
+
+                        UUID uuid = getFieldObject(entry, UUID.class.getSimpleName());
+                        if (!shouldHideSelf() && player.getUniqueId().equals(uuid)) continue;
 
                         Class<?> clazz = gameType.getClass();
                         Field replaceField = clazz.getDeclaredField(REPLACEMENT_ENUM);
@@ -109,6 +113,10 @@ public class PacketListener implements Listener {
 
         ChannelPipeline pipeline = getPlayerChannel(player).pipeline();
         pipeline.addBefore("packet_handler", player.getName(), channelDuplexHandler);
+    }
+
+    private boolean shouldHideSelf() {
+        return plugin.getConfig().getBoolean("hide-spectator-mode-self", false);
     }
 
     private void removePlayer(Player player) {
