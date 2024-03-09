@@ -41,7 +41,3 @@ group-prefix: '<simplyrank_prefix> <green>'
 group-suffix: ''
 group-player-color: '<simplyrank_code_color>'
 tab-displayname: '<player_displayname>'
-
-# If set to true, the player will see themselves as non-spectator in TAB.
-# However, they will lose the ability to travel through walls.
-hide-spectator-mode-self: false
