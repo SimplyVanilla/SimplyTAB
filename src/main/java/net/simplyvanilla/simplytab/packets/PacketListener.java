@@ -61,7 +61,7 @@ public class PacketListener implements Listener {
                     for (int i = 0; i < entries.size(); i++) {
                         Object entry = entries.get(i);
 
-                        UUID uuid = getFieldObject(entries, UUID.class.getSimpleName());
+                        UUID uuid = getFieldObject(entry, UUID.class.getSimpleName());
                         if (!plugin.getConfig().getBoolean("hide-spectator-mode-self", false)) {
                             if (player.getUniqueId().equals(uuid)) continue;
                         }
