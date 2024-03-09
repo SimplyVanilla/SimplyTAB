@@ -7,14 +7,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class PacketListener implements Listener {
@@ -23,6 +21,11 @@ public class PacketListener implements Listener {
     private static final String GAME_MODE_ENUM_NAME = "EnumGamemode";
     private static final String SPECTATOR_ENUM_NAME = "SPECTATOR";
     private static final String REPLACEMENT_ENUM = "c"; // ADVENTURE
+    private final JavaPlugin plugin;
+
+    public PacketListener(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -57,6 +60,11 @@ public class PacketListener implements Listener {
 
                     for (int i = 0; i < entries.size(); i++) {
                         Object entry = entries.get(i);
+
+                        UUID uuid = getFieldObject(entries, UUID.class.getSimpleName());
+                        if (!plugin.getConfig().getBoolean("hide-spectator-mode-self", false)) {
+                            if (player.getUniqueId().equals(uuid)) continue;
+                        }
 
                         Field gameTypeField = getField(entry, GAME_MODE_ENUM_NAME);
                         Enum<?> gameType = (Enum<?>) gameTypeField.get(entry);
