@@ -32,7 +32,7 @@ public class SimplyTabPlugin extends JavaPlugin {
         new TablistManager(this);
         new TablistRankHandler(this);
 
-        this.packetListener = new PacketListener();
+        this.packetListener = new PacketListener(this);
         this.packetListener.loadAll();
         Bukkit.getPluginManager().registerEvents(this.packetListener, this);
     }
