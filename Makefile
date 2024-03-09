@@ -8,6 +8,7 @@ all: build
 .PHONY: build
 build:
 	./gradlew build
+	rm build/libs/*-dev*.jar
 
 
 .PHONY: coveralls
