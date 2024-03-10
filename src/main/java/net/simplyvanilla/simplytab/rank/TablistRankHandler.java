@@ -1,8 +1,6 @@
 package net.simplyvanilla.simplytab.rank;
 
 import io.github.miniplaceholders.api.MiniPlaceholders;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.megavex.scoreboardlibrary.api.team.ScoreboardTeam;
@@ -10,27 +8,23 @@ import net.megavex.scoreboardlibrary.api.team.TeamDisplay;
 import net.megavex.scoreboardlibrary.api.team.TeamManager;
 import net.simplyvanilla.simplytab.SimplyTabPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class TablistRankHandler implements Listener {
     private final SimplyTabPlugin plugin;
     private final TeamManager teamManager;
-    private final String groupPlayerColor;
-    private final String tabDisplayName;
 
     public TablistRankHandler(SimplyTabPlugin plugin) {
         this.plugin = plugin;
         this.teamManager = this.plugin.getScoreboardLibrary().createTeamManager();
-        this.groupPlayerColor = plugin.getConfig().getString("group-player-color");
-        this.tabDisplayName = plugin.getConfig().getString("tab-displayname");
-
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -56,21 +50,6 @@ public class TablistRankHandler implements Listener {
         String teamName = this.getTeamName(player);
         ScoreboardTeam scoreboardTeam = this.teamManager.createIfAbsent(teamName);
         TeamDisplay display = scoreboardTeam.defaultDisplay();
-
-        display.prefix(MiniMessage.miniMessage().deserialize(
-            this.plugin.getConfig().getString("group-prefix", ""),
-            MiniPlaceholders.getAudienceGlobalPlaceholders(player)
-        ));
-
-        display.suffix(MiniMessage.miniMessage().deserialize(
-            this.plugin.getConfig().getString("group-suffix", ""),
-            MiniPlaceholders.getAudienceGlobalPlaceholders(player)
-        ));
-
-        Component component = MiniMessage.miniMessage().deserialize(this.groupPlayerColor, MiniPlaceholders.getAudienceGlobalPlaceholders(player));
-
-        display.playerColor(NamedTextColor.nearestTo(component.style().color() == null ? NamedTextColor.WHITE : component.style().color()));
-        display.displayName(MiniMessage.miniMessage().deserialize(this.tabDisplayName, MiniPlaceholders.getAudienceGlobalPlaceholders(player)));
         display.addEntry(player.getName());
     }
 
