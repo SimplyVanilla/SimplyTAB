@@ -1,6 +1,7 @@
 package net.simplyvanilla.simplytab.tab;
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.simplyvanilla.simplytab.SimplyTabPlugin;
 import org.bukkit.entity.Player;
@@ -39,8 +40,11 @@ public class TablistManager {
     }
 
     private void updateTablistForPlayer(Player player) {
+        Component component = this.plugin.getPrefix(player)
+            .append(player.displayName())
+            .append(this.plugin.getSuffix(player));
+        player.playerListName(component);
 
-        player.playerListName(player.displayName());
         TagResolver tpsResolver = resolver("tps", inserting(miniMessage().deserialize(this.getTps())));
 
         TagResolver resolvers = resolver(
