@@ -24,13 +24,11 @@ public class TablistRankHandler implements Listener {
     private final SimplyTabPlugin plugin;
     private final TeamManager teamManager;
     private final String groupPlayerColor;
-    private final String tabDisplayName;
 
     public TablistRankHandler(SimplyTabPlugin plugin) {
         this.plugin = plugin;
         this.teamManager = this.plugin.getScoreboardLibrary().createTeamManager();
         this.groupPlayerColor = plugin.getConfig().getString("group-player-color");
-        this.tabDisplayName = plugin.getConfig().getString("tab-displayname");
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -65,7 +63,6 @@ public class TablistRankHandler implements Listener {
         Component component = MiniMessage.miniMessage().deserialize(this.groupPlayerColor, MiniPlaceholders.getAudienceGlobalPlaceholders(player));
 
         display.playerColor(NamedTextColor.nearestTo(component.style().color() == null ? NamedTextColor.WHITE : component.style().color()));
-        display.displayName(MiniMessage.miniMessage().deserialize(this.tabDisplayName, MiniPlaceholders.getAudienceGlobalPlaceholders(player)));
         display.addEntry(player.getName());
     }
 
