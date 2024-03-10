@@ -58,15 +58,9 @@ public class TablistRankHandler implements Listener {
         ScoreboardTeam scoreboardTeam = this.teamManager.createIfAbsent(teamName);
         TeamDisplay display = scoreboardTeam.defaultDisplay();
 
-        display.prefix(MiniMessage.miniMessage().deserialize(
-            this.plugin.getConfig().getString("group-prefix", ""),
-            MiniPlaceholders.getAudienceGlobalPlaceholders(player)
-        ));
+        display.prefix(this.plugin.getPrefix(player));
 
-        display.suffix(MiniMessage.miniMessage().deserialize(
-            this.plugin.getConfig().getString("group-suffix", ""),
-            MiniPlaceholders.getAudienceGlobalPlaceholders(player)
-        ));
+        display.suffix(this.plugin.getSuffix(player));
 
         Component component = MiniMessage.miniMessage().deserialize(this.groupPlayerColor, MiniPlaceholders.getAudienceGlobalPlaceholders(player));
 
