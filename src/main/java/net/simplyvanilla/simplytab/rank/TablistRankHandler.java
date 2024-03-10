@@ -1,8 +1,6 @@
 package net.simplyvanilla.simplytab.rank;
 
 import io.github.miniplaceholders.api.MiniPlaceholders;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.megavex.scoreboardlibrary.api.team.ScoreboardTeam;
@@ -23,13 +21,10 @@ import java.util.Map;
 public class TablistRankHandler implements Listener {
     private final SimplyTabPlugin plugin;
     private final TeamManager teamManager;
-    private final String groupPlayerColor;
 
     public TablistRankHandler(SimplyTabPlugin plugin) {
         this.plugin = plugin;
         this.teamManager = this.plugin.getScoreboardLibrary().createTeamManager();
-        this.groupPlayerColor = plugin.getConfig().getString("group-player-color");
-
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -55,14 +50,6 @@ public class TablistRankHandler implements Listener {
         String teamName = this.getTeamName(player);
         ScoreboardTeam scoreboardTeam = this.teamManager.createIfAbsent(teamName);
         TeamDisplay display = scoreboardTeam.defaultDisplay();
-
-        display.prefix(this.plugin.getPrefix(player));
-
-        display.suffix(this.plugin.getSuffix(player));
-
-        Component component = MiniMessage.miniMessage().deserialize(this.groupPlayerColor, MiniPlaceholders.getAudienceGlobalPlaceholders(player));
-
-        display.playerColor(NamedTextColor.nearestTo(component.style().color() == null ? NamedTextColor.WHITE : component.style().color()));
         display.addEntry(player.getName());
     }
 
